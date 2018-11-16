@@ -32,12 +32,17 @@ function showSearchResults(data) {
     $("#content").empty();
     $("#bottom").empty();
     let meta = data["meta"];
+    let page = meta["page"];
     let results = data["results"];
     formatVerses(results, null, meta["text"]);
     if (meta["total"] > 1) {
         let pagination = "<nav aria-label='navigation'><ul class='pagination justify-content-center'>"
         for (var i = 1; i <= Math.min(10, meta["total"]); ++i) {
-            pagination += "<li class='page-item'><a class='page-link' href='#'>" + i + "</a></li>"
+            if (i == page) {
+                pagination += "<li class='page-item disabled'><span class='page-link'>" + i + "</span></li>"
+            } else {
+                pagination += "<li class='page-item'><a class='page-link' href='#'>" + i + "</a></li>"
+            }
         }
         pagination += "</ul></nav>";
         $("#bottom").append(pagination);
