@@ -7,7 +7,7 @@ $(document).ready(function() {
 $("#search").submit(function(event) {
     let q = event.currentTarget[0].value;
     if (q.length > 0) {
-        $.getJSON(host + "/search?q=" + q, showSearchResults);
+        gotoPage(q, 1)
     }
     event.preventDefault();
 });
@@ -18,23 +18,32 @@ function gotoPage(query, page) {
     }
 }
 
+function gotoReference(query) {
+    if (query.length > 0) {
+        $.getJSON(host + "/refs?q=" + query, showRefsResults);
+    }
+}
+
 function showResults(data) {
     $("#content").empty();
     $("#bottom").empty();
+    $("#content").addClass("row");
     data["results"].forEach(function(entry) {
         let verses = entry["texts"];
         let title = entry["reference"]["title"];
-        formatVerses(verses, title);
+        let alt = entry["reference"]["alt"];
+        formatVerses(verses, title, alt, 'col-xs-2 col-md-6');
     });
 }
 
 function showSearchResults(data) {
     $("#content").empty();
     $("#bottom").empty();
+    $("#content").addClass("row");
     let meta = data["meta"];
     let page = meta["page"];
     let results = data["results"];
-    formatVerses(results, null, meta["text"]);
+    formatVerses(results, null, null, 'col-xs-2 col-md-6', meta["text"]);
     if (meta["total"] == 0) {
         $("#bottom").append("<p class='font-weight-light text-center'>Ничего не найдено</p>");
     } else if (meta["total"] > 1) {
@@ -55,25 +64,45 @@ function showSearchResults(data) {
     }
 }
 
-function formatVerses(verses, title, query) {
+function showRefsResults(data) {
+    $("#content").empty();
+    $("#bottom").empty();
+    $("#content").addClass("justify-content-center");
+    data["results"].forEach(function(entry) {
+        let verses = entry["texts"];
+        let title = entry["reference"]["title"];
+        let alt = entry["reference"]["alt"];
+        $("#top").append("<div class='col-sm-12 text-center'><h1 class='title'>" + title + "</h1></div>");
+        formatVerses(verses, title, alt, "col-sm-8");
+    });
+}
+
+function formatVerses(verses, title, alt, cls, query) {
     verses.forEach(function(t) {
         t.forEach(function(v) {
             let regex = new RegExp('(\\s+|^)(_)(.+?)(\\2)', 'g');
             let text = v["text"].replace(regex, '$1<i>$3</i>').replace('--', '&ndash;');
             if (!title) {
-                book_title = v["book_alt"];
+                book_title = v["book_name"];
             } else {
                 book_title = title;
+            }
+            if (!alt) {
+                book_alt = v["book_alt"];
+            } else {
+                book_alt = alt;
             }
             if (query && query.length > 0) {
                 let regex = new RegExp('(' + query + ')', 'gui');
                 text = text.replace(regex, "<mark>$1</mark>");
             }
-            let ref = book_title + " " + v["chapter"] + ":" + v["verse"];
-            let row = "<div class='col-xs-2 col-md-6'>" +
+            let ref_alt = book_alt + " " + v["chapter"];
+            let ref_name = book_title + " " + v["chapter"] + ":" + v["verse"];
+            let ref_link = "<a href='#' onclick='gotoReference(\"" + ref_alt + "\");'>" + ref_name + "</a>";
+            let row = "<div class='" + cls + "'>" +
                 "<blockquote class='blockquote'>" +
                 "<p class='mb-0'>" + text + "</p>" +
-                "<footer class='blockquote-footer font-italic'>" + ref + "</footer>" +
+                "<footer class='blockquote-footer font-italic'>" + ref_link + "</footer>" +
                 "</blockquote>"+
                 "</div>";
             $("#content").append(row);

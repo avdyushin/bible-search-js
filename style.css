@@ -1,7 +1,11 @@
 a {
-    color: black;
+    color_: black;
 }
 
-blockquote {
+h1 {
+    padding-bottom: 1rem;
+}
+
+blockquote, h1 {
     font-family: Georgia,Times,Times New Roman,serif;
 }
