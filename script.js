@@ -35,7 +35,9 @@ function showSearchResults(data) {
     let page = meta["page"];
     let results = data["results"];
     formatVerses(results, null, meta["text"]);
-    if (meta["total"] > 1) {
+    if (meta["total"] == 0) {
+        $("#bottom").append("<p class='font-weight-light text-center'>Ничего не найдено</p>");
+    } else if (meta["total"] > 1) {
         let pagination = "<nav aria-label='navigation'><ul class='pagination justify-content-center'>"
         for (var i = 1; i <= Math.min(10, meta["total"]); ++i) {
             if (i == page) {
